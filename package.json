@@ -14,7 +14,8 @@
     "categories": "node categories.mjs",
     "create": "node create-draft.mjs",
     "push": "node push-body.mjs",
-    "post": "node post-draft.mjs"
+    "post": "node post-draft.mjs",
+    "skill": "node install-skill.mjs"
   },
   "dependencies": {
     "markdown-it": "^14.1.0",

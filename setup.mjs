@@ -1,7 +1,7 @@
 // セットアップ: 依存のインストール、管理画面 URL の設定（config.local.json）、ログインを行う。
 //
 // 使い方:
-//   node setup.mjs [--base-url <管理画面のURL>] [--skip-login]
+//   node setup.mjs [--base-url <管理画面のURL>] [--skip-login] [--skill user|none|<ディレクトリ>]
 //
 // - Node.js 20 以上が必要。
 // - npm install → npx playwright install chromium を順に実行する。
@@ -9,12 +9,16 @@
 //   --base-url を省略し、まだ設定が無ければ入力を求める。
 // - 最後にログインする。未ログインならブラウザが開くので、その画面でログインする（ログイン済みなら開かない）。
 //   --skip-login で省略できる（あとで `npm run login`）。
+// - 最後に Claude Code / Codex 用のスキル ourly-poster を置く（install-skill.mjs）。
+//   インストール済みなら記録された場所を更新する。未インストールなら --skill に従う
+//   （user = ユーザー全体、<ディレクトリ> = そのディレクトリだけ、none = 置かない）。省略時は番号で選ぶ。
 // - lib/cli.mjs は依存（markdown-it 等）を読み込むため、このスクリプトは Node 標準モジュールだけで書く。
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline/promises';
+import { installSkill, refreshSkills, toInstall } from './install-skill.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const localConfigPath = resolve(here, 'config.local.json');
@@ -86,12 +90,53 @@ async function main() {
   console.log(`\n管理画面の URL: ${local.baseUrl}（config.local.json に保存）`);
 
   const loggedIn = argv.includes('--skip-login') ? false : await login();
+  await skill(argv.includes('--skill') ? argv[argv.indexOf('--skill') + 1] : undefined);
 
   console.log('\n✅ セットアップ完了');
   if (loggedIn) {
     console.log('   準備完了です。`npm run create -- "<本文.md>"` で使えます。');
   } else {
     console.log('   ログインはまだです。`npm run login` でログインしてください。');
+  }
+}
+
+// Claude Code / Codex 用のスキル。記録があれば更新し、無ければ --skill か番号選択に従う
+async function skill(arg) {
+  console.log('\n▶ Claude Code / Codex 用のスキル');
+  if (refreshSkills()) return;
+  if (!arg && !process.stdin.isTTY) {
+    console.log('スキルは置いていません。使うときは `npm run skill -- --scope user` などで置いてください。');
+    return;
+  }
+  if (!arg) arg = await askSkill();
+  if (arg === 'none') {
+    console.log('スキルは置きません（あとで `npm run skill -- --scope user` などで置けます）。');
+    return;
+  }
+  installSkill(arg === 'user' ? toInstall({ scope: 'user' }) : toInstall({ scope: 'project', dir: arg }));
+}
+
+async function askSkill() {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    console.log('\nClaude Code / Codex から使うためのスキルを、どこに置きますか？');
+    console.log('  1) ユーザー全体（どのフォルダで起動しても使える）');
+    console.log('  2) ディレクトリを指定（記事を書くフォルダなど）');
+    console.log('  3) 置かない');
+    for (;;) {
+      const n = (await rl.question('番号> ')).trim();
+      if (n === '1') return 'user';
+      if (n === '3') return 'none';
+      if (n === '2') {
+        const dir = (await rl.question('ディレクトリ> ')).trim().replace(/^["']|["']$/g, '');
+        if (dir && existsSync(resolve(dir))) return resolve(dir);
+        console.log('  存在するディレクトリを入力してください。');
+        continue;
+      }
+      console.log('  1〜3 の番号を入力してください。');
+    }
+  } finally {
+    rl.close();
   }
 }
 

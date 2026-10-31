@@ -49,6 +49,32 @@ npm run push -- "記事_本文.md"     # ② 本文を流し込む
 - コマンドはこのツールのフォルダで実行する。md のパスは、フォルダからの相対パスか、フルパスで指定する（ファイルをターミナルにドラッグ＆ドロップするとフルパスが入る）。
 - 出力された「詳細」の URL を開くと、管理画面で下書きを確認できる。
 
+## Claude Code / Codex から使う
+
+### 初期設定
+
+このツールのフォルダで Claude Code または Codex を起動し、「セットアップして」と頼む。エージェントが管理画面の URL とスキルの置き場所を聞き、setup を実行する。途中でブラウザが開くので、その画面で ourly にログインする（パスワードはエージェントに伝えない）。
+
+### スキル ourly-poster
+
+setup の最後に、Claude Code / Codex 用のスキル `ourly-poster` を置く場所を選べる。置いた場所で Claude Code / Codex を起動すると、「この md を ourly に下書き保存して」と頼むだけで、状態確認 → カテゴリ確認 → dry-run → 保存まで進める（保存の前に確認を求める）。ログインが切れていれば、エージェントがログイン用のブラウザを開く。
+
+| 置き場所 | 使える範囲 |
+|---|---|
+| ユーザー全体（`~/.claude/skills`・`~/.agents/skills`） | どのフォルダで起動しても使える |
+| ディレクトリを指定（`<dir>/.claude/skills`・`<dir>/.agents/skills`） | そのディレクトリ（記事を書くプロジェクトなど）で起動したときだけ |
+
+あとから置く・消すときは次のとおり。
+
+```bash
+npm run skill -- --scope user                          # ユーザー全体
+npm run skill -- --scope project --dir ~/works/blog    # 指定したディレクトリ
+npm run skill -- --scope user --agent codex            # Codex だけ（claude / codex / both）
+npm run skill -- --scope user --uninstall              # 消す
+```
+
+スキルにはこのツールの場所が書き込まれる。ツールのフォルダを移動・更新したら `npm run setup` を再実行すると、置いたスキルが全て更新される。
+
 ## 記事ファイルの書き方
 
 - 本文は `<タイトル>_本文.md`、アイキャッチは同じフォルダの `<タイトル>_アイキャッチ.png` にすると、アイキャッチを自動で見つける。
@@ -71,13 +97,14 @@ analysis: その他
 
 | コマンド | 内容 |
 |---|---|
-| `npm run setup` | 依存のインストール・管理画面 URL の設定・ログイン（`--skip-login` でログインを省略） |
+| `npm run setup` | 依存のインストール・管理画面 URL の設定・ログイン・スキルの配置（`--skip-login` でログインを省略、`--skill user\|none\|<dir>` でスキルの置き場所を指定） |
 | `npm run login` | ログインだけを行う（人がブラウザ画面で行う。再ログイン用） |
 | `npm run doctor` | 設定・依存・ログイン状態の確認（ブラウザ画面は開かない） |
 | `npm run categories` | ourly に現在あるカテゴリ一覧を表示 |
 | `npm run create -- <md>` | ① 空の下書きを作成 |
 | `npm run push -- <md>` | ② 本文を流し込む |
 | `npm run post -- <md>` | ① → ② を続けて実行 |
+| `npm run skill -- --scope ...` | Claude Code / Codex 用のスキルを置く・消す |
 
 `node create-draft.mjs ...` のように直接実行してもよい。各コマンドは `--help` で使い方を表示する。
 
@@ -133,10 +160,11 @@ analysis: その他
 
 - ZIP で入手した場合: 新しい ZIP を展開し、古いフォルダから `config.local.json` と `auth/` フォルダを新しいフォルダへコピーしてから `setup` を実行する。
 - git の場合: `git pull` → `npm run setup`。
+- どちらも setup を再実行すると、置いたスキルも新しい内容とフォルダの場所に更新される。
 
 ## 安全上の注意
 
 - 常に **非公開の下書き** として保存する。このツールは公開・公開予約をしない。
 - 記事の削除は管理画面から手動で行う（このツールは作成と更新のみ）。
 - パスワードはツールでは扱わない。ログインは必ずブラウザ画面で本人が行う。
-- `auth/`（ログイン状態）と `config.local.json`（管理画面 URL）は各自の環境専用。共有・コミットしない（`.gitignore` 済み）。
+- `auth/`（ログイン状態）と `config.local.json`（管理画面 URL・スキルの置き場所）は各自の環境専用。共有・コミットしない（`.gitignore` 済み）。
