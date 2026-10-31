@@ -1,6 +1,6 @@
 {
   "name": "ourly-poster",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "markdown 記事を ourly 管理画面に非公開の下書きとして保存する CLI",
