@@ -19,6 +19,7 @@ markdown 記事を ourly 管理画面に **非公開の下書き** として保�
 | `npm run login` | ログイン。ブラウザが開き、**人が画面でログインする**（完了を自動検知、最大5分） | ローカルのみ |
 | `npm run skill -- --scope user\|project [--dir <dir>] [--agent claude\|codex\|both] [--uninstall]` | Claude Code / Codex 用のスキル `ourly-poster` を置く・消す | ローカルのみ |
 | `npm run doctor` | 設定・依存・ログイン状態の確認（画面は開かない） | なし |
+| `npm run update` | GitHub（`nktnklg/ourly-poster` の main）から最新版を取得し、インストール先を入れ替えてスキルも更新する（ログイン状態・設定は残る） | ローカルのみ |
 | `npm run categories` | 現在のカテゴリ一覧を表示 | なし |
 | `node create-draft.mjs <md> --category <名前> --analysis <名前> [--dry-run]` | ① 空の下書きを作成 | **ourly に作成** |
 | `node push-body.mjs <md> [--meta] [--title] [--eyecatch <png>] [--category <名前>] [--analysis <名前>] [--no-body] [--dry-run]` | ② 本文を流し込む（オプションでタイトル・アイキャッチ・カテゴリも更新） | **ourly を更新** |
@@ -44,6 +45,10 @@ Codex のサンドボックスではブラウザの起動とネットワーク�
 2. `--dry-run` で内容を確認する: `node create-draft.mjs <md> --category ... --analysis ... --dry-run` / `node push-body.mjs <md> --dry-run`。
 3. カテゴリが分からなければ `npm run categories` で候補を取得し、ユーザーに選んでもらう。エージェントの実行環境ではターミナルの番号選択が使えないため、`--category` / `--analysis` で渡すか、frontmatter に書く。
 4. **ユーザーの指示を得てから** dry-run なしで ① → ② を実行する。出力の「詳細」URL をユーザーに伝える。
+
+## リリースするとき
+
+社内の利用者は `npm run update` で main の最新を取り込む。main に入れたものがそのまま配布されるので、壊れた状態で push しない。リリースごとに `package.json` の `version` を上げる（update の前後の版として表示される）。
 
 ## frontmatter（本文 md の先頭）
 
@@ -74,6 +79,7 @@ ourly_id: <自動>           # ① が書き込む。手で変えない
 - `lib/images.mjs`: 本文画像の確認・読み込み、アップロード結果の再利用（`cache/uploaded-images.json`、git 管理外）
 - `install-skill.mjs`: スキルの配置。`skills/ourly-poster/SKILL.md` をひな形に、ツールの絶対パス（`{{TOOL_DIR}}`）を埋め込んでコピーし、配置先を `config.local.json` の `skillInstalls` に記録する（setup の再実行で更新）
 - `skills/ourly-poster/SKILL.md`: スキルのひな形（Claude Code / Codex 共通）。手順を変えたら AGENTS.md と合わせる
+- `update.mjs`: 最新版の tar.gz を一時フォルダに取得・展開し、その `setup.mjs --skip-login --skill none` を実行して入れ替える。Node 標準モジュールと `tar` だけで動かす
 - `lib/install-dir.mjs`: setup がツール一式をインストール先（`~/.ourly-poster`）へコピーする処理。`auth/`・`cache/`・`config.local.json`・`node_modules/` はコピー先のものを残す。開発中はリポジトリを編集し、setup を再実行してコピー先に反映する
 - `lib/cli.mjs`: 設定の読み込み（`config.json` + `config.local.json`）、引数の解析、カテゴリ選択、`--help`
 - `config.json`: 共通設定（API パスなど）。テナント固有の値は書かない

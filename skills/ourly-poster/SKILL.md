@@ -23,6 +23,10 @@ markdown 記事を ourly 管理画面に **非公開の下書き** として保�
    - `ourly_id` がある md は `push-body.mjs` で本文だけを上書きする（下書きを作り直さない）。
    - `ourly_id` がある md のタイトル・アイキャッチ・カテゴリを変えたいときは、`push-body.mjs` に `--meta`（まとめて md から反映）か `--title` / `--eyecatch <png>` / `--category <名前>` / `--analysis <名前>` を付ける。本文を変えないときは `--no-body` も付ける。まず `--dry-run` で変更前後を確認する。
 
+## アップデート
+
+「ourly-poster をアップデートして」と頼まれたら `node "{{TOOL_DIR}}/update.mjs"` を実行する（GitHub から最新版を取得し、ツールとこのスキルを入れ替える。ログイン状態・設定は残る）。完了したら「Claude Code / Codex を起動し直すと新しいスキルが読み込まれる」と伝える。
+
 各コマンドの詳細は `--help` で表示できる。アイキャッチは md と同じフォルダの `<タイトル>_アイキャッチ.png` を自動で使う（`--eyecatch <png>` で指定も可）。
 
 本文の画像は `![キャプション](相対パス or URL)` で書く（相対パスは md のフォルダ基準、png / jpg / jpeg / gif）。dry-run の「本文画像」に ⚠️ が出たら、パスか形式を直してから実行する。
@@ -38,4 +42,4 @@ markdown 記事を ourly 管理画面に **非公開の下書き** として保�
 
 ## Codex で実行するとき
 
-サンドボックスではブラウザの起動とネットワーク接続が塞がれる。`doctor` / `setup` / `login` / `categories` / `post-draft` / `push-body` は、権限の昇格（サンドボックス外での実行の承認）を求めて実行する。
+サンドボックスではブラウザの起動とネットワーク接続が塞がれる。`doctor` / `setup` / `update` / `login` / `categories` / `post-draft` / `push-body` は、権限の昇格（サンドボックス外での実行の承認）を求めて実行する。

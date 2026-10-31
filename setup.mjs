@@ -102,6 +102,7 @@ async function main() {
 
   console.log('\n✅ セットアップ完了');
   console.log(`   ツールの場所: ${here}`);
+  if (process.env.OURLY_POSTER_UPDATING) return; // update.mjs から呼ばれたとき（一時フォルダは update が消す）
   if (process.env.OURLY_POSTER_COPIED_FROM) {
     console.log(`   ダウンロードしたフォルダ（${process.env.OURLY_POSTER_COPIED_FROM}）は削除してかまいません。`);
   }

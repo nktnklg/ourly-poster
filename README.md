@@ -108,6 +108,7 @@ analysis: その他
 | `npm run push -- <md>` | ② 本文を流し込む |
 | `npm run post -- <md>` | ① → ② を続けて実行 |
 | `npm run skill -- --scope ...` | Claude Code / Codex 用のスキルを置く・消す |
+| `npm run update` | GitHub から最新版をダウンロードして入れ替える（スキルも更新） |
 
 `node create-draft.mjs ...` のように直接実行してもよい。各コマンドは `--help` で使い方を表示する。
 
@@ -177,9 +178,15 @@ analysis: その他
 
 ## 更新するとき
 
-- ZIP で入手した場合: 新しい ZIP を展開し、そのフォルダで `setup` を実行する（ダブルクリックでよい）。
-- git の場合: `git pull` → `npm run setup`。
-- どちらも `~/.ourly-poster` が新しい版で上書きされる。ログイン状態（`auth/`）・管理画面の URL とスキルの記録（`config.local.json`）・画像のキャッシュ（`cache/`）は残り、置いたスキルも更新される。
+```bash
+cd ~/.ourly-poster
+npm run update
+```
+
+- GitHub から最新版をダウンロードし、`~/.ourly-poster` を新しい版で入れ替える（git は不要）。
+- ログイン状態（`auth/`）・管理画面の URL とスキルの記録（`config.local.json`）・画像のキャッシュ（`cache/`）は残り、置いたスキルも更新される。
+- Claude Code / Codex に「ourly-poster をアップデートして」と頼んでもよい。更新後は Claude Code / Codex を起動し直す。
+- `npm run update` が無い古い版（0.1.0）を使っている場合は、一度だけ新しい ZIP を展開して `setup` を実行する（ダブルクリックでよい）。以降は `npm run update` で更新できる。
 
 ## 安全上の注意
 
