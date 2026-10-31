@@ -1,0 +1,24 @@
+{
+  "_comment_baseUrl": "baseUrl は各自の config.local.json に置く（npm run setup が作成。git 管理外）。",
+  "baseUrl": "",
+  "adminArticlesPath": "/admin/articles",
+  "_comment_auth": "ログインはツール専用のブラウザプロファイルに保持する。browserChannel が空なら Playwright 同梱の Chromium、\"chrome\" なら インストール済み Google Chrome。",
+  "authProfileDir": "auth/profile",
+  "browserChannel": "",
+  "api": {
+    "mode": "xhr",
+    "createArticlePath": "/admin/xhr/Article",
+    "uploadImagePath": "/admin/proxy/api/images?imageType=article_main",
+    "editorVersion": "2.29.0",
+    "draftIsOpened": false,
+    "getArticlePath": "/admin/xhr/Article?id={id}",
+    "updateArticlePath": "/admin/xhr/Article?id={id}",
+    "updateMethod": "PUT",
+    "masterPath": "/admin/xhr/Master",
+    "articlesListPath": "/admin/xhr/Articles"
+  },
+  "defaults": {
+    "articleCategory": "",
+    "analysisCategory": ""
+  }
+}

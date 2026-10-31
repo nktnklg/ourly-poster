@@ -1,0 +1,23 @@
+{
+  "name": "ourly-poster",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "markdown 記事を ourly 管理画面に非公開の下書きとして保存する CLI",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "node setup.mjs",
+    "login": "node login.mjs",
+    "doctor": "node doctor.mjs",
+    "categories": "node categories.mjs",
+    "create": "node create-draft.mjs",
+    "push": "node push-body.mjs",
+    "post": "node post-draft.mjs"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0",
+    "playwright": "^1.48.0"
+  }
+}

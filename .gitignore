@@ -1,0 +1,8 @@
+node_modules/
+auth/
+recon/
+recon*.mjs
+config.local.json
+.claude/
+*.log
+.DS_Store
