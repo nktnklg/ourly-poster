@@ -1,12 +1,14 @@
-// セットアップ: 依存のインストールと、管理画面 URL の設定（config.local.json）を行う。
+// セットアップ: 依存のインストール、管理画面 URL の設定（config.local.json）、ログインを行う。
 //
 // 使い方:
-//   node setup.mjs [--base-url <管理画面のURL>]
+//   node setup.mjs [--base-url <管理画面のURL>] [--skip-login]
 //
 // - Node.js 20 以上が必要。
 // - npm install → npx playwright install chromium を順に実行する。
 // - 管理画面の URL（例: https://<テナント>.media.ourly.jp）を config.local.json に保存する。
 //   --base-url を省略し、まだ設定が無ければ入力を求める。
+// - 最後にログインする。未ログインならブラウザが開くので、その画面でログインする（ログイン済みなら開かない）。
+//   --skip-login で省略できる（あとで `npm run login`）。
 // - lib/cli.mjs は依存（markdown-it 等）を読み込むため、このスクリプトは Node 標準モジュールだけで書く。
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -83,11 +85,31 @@ async function main() {
   writeFileSync(localConfigPath, JSON.stringify(local, null, 2) + '\n');
   console.log(`\n管理画面の URL: ${local.baseUrl}（config.local.json に保存）`);
 
+  const loggedIn = argv.includes('--skip-login') ? false : await login();
+
   console.log('\n✅ セットアップ完了');
-  if (existsSync(resolve(here, 'auth', 'profile'))) {
-    console.log('   ログイン状態は `npm run doctor` で確認できます。');
+  if (loggedIn) {
+    console.log('   準備完了です。`npm run create -- "<本文.md>"` で使えます。');
   } else {
-    console.log('   次は `npm run login` でログインしてください（初回のみ）。');
+    console.log('   ログインはまだです。`npm run login` でログインしてください。');
+  }
+}
+
+// ログイン。済んでいれば画面なしで確認するだけ、未ログインならブラウザを開いて完了を待つ。
+// 失敗しても依存と URL の設定は済んでいるので、setup 全体は失敗にしない。
+// lib は依存（playwright 等）を読むため、npm install 後に動的 import する。
+async function login() {
+  console.log('\n▶ ログイン');
+  const { openAuthedContext } = await import('./lib/ourly.mjs');
+  const { config } = await import('./lib/cli.mjs');
+  try {
+    const { close } = await openAuthedContext(config);
+    await close();
+    console.log('ログイン済みです。');
+    return true;
+  } catch (err) {
+    console.log(`⚠️ ログインは完了していません（${err.message}）`);
+    return false;
   }
 }
 
