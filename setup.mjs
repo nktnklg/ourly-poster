@@ -4,6 +4,9 @@
 //   node setup.mjs [--base-url <管理画面のURL>] [--skip-login] [--skill user|none|<ディレクトリ>]
 //
 // - Node.js 20 以上が必要。
+// - まずツール一式を ~/.ourly-poster（環境変数 OURLY_POSTER_HOME で変更可）にコピーし、そこで setup を続ける。
+//   ダウンロードしたフォルダは、セットアップ後に削除してかまわない。再実行すると新しい版で上書きする
+//   （ログイン状態・管理画面の URL・スキルの記録・画像のキャッシュは残る）。
 // - npm install → npx playwright install chromium を順に実行する。
 // - 管理画面の URL（例: https://<テナント>.media.ourly.jp）を config.local.json に保存する。
 //   --base-url を省略し、まだ設定が無ければ入力を求める。
@@ -19,6 +22,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline/promises';
 import { installSkill, refreshSkills, toInstall } from './install-skill.mjs';
+import { copyToInstallDir, isInstalled } from './lib/install-dir.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const localConfigPath = resolve(here, 'config.local.json');
@@ -75,6 +79,10 @@ async function main() {
   }
   console.log(`Node.js ${process.versions.node} OK`);
 
+  if (!isInstalled(here)) {
+    process.exit(await relocate(argv));
+  }
+
   await runStep('依存パッケージのインストール', 'npm install');
   await runStep('ブラウザ (Chromium) のインストール', 'npx playwright install chromium');
 
@@ -93,11 +101,35 @@ async function main() {
   await skill(argv.includes('--skill') ? argv[argv.indexOf('--skill') + 1] : undefined);
 
   console.log('\n✅ セットアップ完了');
-  if (loggedIn) {
-    console.log('   準備完了です。`npm run create -- "<本文.md>"` で使えます。');
-  } else {
-    console.log('   ログインはまだです。`npm run login` でログインしてください。');
+  console.log(`   ツールの場所: ${here}`);
+  if (process.env.OURLY_POSTER_COPIED_FROM) {
+    console.log(`   ダウンロードしたフォルダ（${process.env.OURLY_POSTER_COPIED_FROM}）は削除してかまいません。`);
   }
+  if (loggedIn) {
+    console.log(`   準備完了です。\`cd "${here}"\` して \`npm run create -- "<本文.md>"\` で使えます。`);
+  } else {
+    console.log(`   ログインはまだです。\`cd "${here}"\` して \`npm run login\` でログインしてください。`);
+  }
+}
+
+// ツール一式をインストール先へコピーし、そこの setup.mjs を同じ引数で実行する。終了コードを返す
+async function relocate(argv) {
+  const dest = copyToInstallDir(here);
+  console.log(`\nツールを ${dest} にコピーしました。以降はここから使います。`);
+  // --skill <ディレクトリ> の相対パスは、元の場所を基準に絶対パスにしておく
+  const args = [...argv];
+  const k = args.indexOf('--skill');
+  if (k >= 0 && args[k + 1] && !['user', 'none'].includes(args[k + 1])) {
+    args[k + 1] = resolve(process.env.INIT_CWD || process.cwd(), args[k + 1]);
+  }
+  return new Promise((ok, ng) => {
+    const p = spawn(process.execPath, [resolve(dest, 'setup.mjs'), ...args], {
+      stdio: 'inherit',
+      env: { ...process.env, OURLY_POSTER_COPIED_FROM: here },
+    });
+    p.on('exit', (code) => ok(code ?? 1));
+    p.on('error', ng);
+  });
 }
 
 // Claude Code / Codex 用のスキル。記録があれば更新し、無ければ --skill か番号選択に従う

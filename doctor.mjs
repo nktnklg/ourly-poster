@@ -24,6 +24,8 @@ function report(good, msg, next) {
 }
 
 report(Number(process.versions.node.split('.')[0]) >= 20, `Node.js ${process.versions.node}`, 'Node.js 20 以上をインストール');
+const { installDir, isInstalled } = await import('./lib/install-dir.mjs');
+report(isInstalled(here), `ツールの場所: ${here}`, `このフォルダで \`node setup.mjs\` を実行すると ${installDir()} にコピーされ、そこから使えます`);
 const depsOk = existsSync(resolve(here, 'node_modules', 'playwright')) && existsSync(resolve(here, 'node_modules', 'markdown-it'));
 report(depsOk, '依存パッケージ', '`npm run setup` を実行');
 

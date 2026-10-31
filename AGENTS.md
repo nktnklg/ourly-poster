@@ -33,7 +33,8 @@ markdown 記事を ourly 管理画面に **非公開の下書き** として保�
    - 特定のディレクトリ（記事を書くプロジェクトなど）→ `--skill <ディレクトリ>`
    - 置かない → `--skill none`
 2. `node setup.mjs --base-url <URL> --skill <...>` を実行する。未ログインならブラウザが開くので、「開いたブラウザで ourly にログインしてください」とユーザーに伝える。完了は自動で検知される（最大5分待つ）ため、コマンドのタイムアウトは 10 分にする。
-3. `npm run doctor` で全て ✅ になったことを確認する。スキルを置いた場合は「Claude Code / Codex を起動し直すと、そのフォルダから ourly-poster スキルで投稿できる」と伝える。
+   setup はツール一式を `~/.ourly-poster`（`OURLY_POSTER_HOME` で変更可）にコピーし、そこで続きを実行する。以降のコマンドはコピー先で実行する。ダウンロードしたフォルダは削除してよいと伝える。
+3. `~/.ourly-poster` で `npm run doctor` を実行し、全て ✅ になったことを確認する。スキルを置いた場合は「Claude Code / Codex を起動し直すと、そのフォルダから ourly-poster スキルで投稿できる」と伝える。
 
 Codex のサンドボックスではブラウザの起動とネットワーク接続が塞がれるため、setup / login / doctor / 投稿系のコマンドは権限の昇格を求めて実行する。
 
@@ -73,6 +74,7 @@ ourly_id: <自動>           # ① が書き込む。手で変えない
 - `lib/images.mjs`: 本文画像の確認・読み込み、アップロード結果の再利用（`cache/uploaded-images.json`、git 管理外）
 - `install-skill.mjs`: スキルの配置。`skills/ourly-poster/SKILL.md` をひな形に、ツールの絶対パス（`{{TOOL_DIR}}`）を埋め込んでコピーし、配置先を `config.local.json` の `skillInstalls` に記録する（setup の再実行で更新）
 - `skills/ourly-poster/SKILL.md`: スキルのひな形（Claude Code / Codex 共通）。手順を変えたら AGENTS.md と合わせる
+- `lib/install-dir.mjs`: setup がツール一式をインストール先（`~/.ourly-poster`）へコピーする処理。`auth/`・`cache/`・`config.local.json`・`node_modules/` はコピー先のものを残す。開発中はリポジトリを編集し、setup を再実行してコピー先に反映する
 - `lib/cli.mjs`: 設定の読み込み（`config.json` + `config.local.json`）、引数の解析、カテゴリ選択、`--help`
 - `config.json`: 共通設定（API パスなど）。テナント固有の値は書かない
 - `config.local.json`: 各自の管理画面 URL・スキルの配置先（git 管理外。`setup` が作成）
