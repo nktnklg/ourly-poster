@@ -6,3 +6,4 @@ config.local.json
 .claude/
 *.log
 .DS_Store
+cache/

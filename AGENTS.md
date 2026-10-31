@@ -7,7 +7,7 @@ AI エージェント（Codex / Claude Code など）がこのリポジトリを
 markdown 記事を ourly 管理画面に **非公開の下書き** として保存する Node.js CLI。2段階で動く。
 
 1. `create-draft.mjs`: タイトル（本文先頭の H1）・アイキャッチ・カテゴリだけの空の下書きを作り、md の frontmatter に `ourly_id` を書き込む。
-2. `push-body.mjs`: md 本文を Editor.js ブロックに変換し、`ourly_id` の下書きの本文だけを更新する（何度でも上書き可）。
+2. `push-body.mjs`: md 本文を Editor.js ブロックに変換し（本文の画像はアップロードして画像ブロックにする）、`ourly_id` の下書きの本文だけを更新する（何度でも上書き可）。
 
 `post-draft.mjs` は 1 → 2 を続けて実行する。
 
@@ -68,8 +68,9 @@ ourly_id: <自動>           # ① が書き込む。手で変えない
 
 ## 構成
 
-- `lib/ourly.mjs`: ブラウザプロファイル（`auth/profile/`、ロック付き）の起動、ログイン待ち、記事 API（作成・取得・更新）、画像アップロード、カテゴリ・リアクションの取得
+- `lib/ourly.mjs`: ブラウザプロファイル（`auth/profile/`、ロック付き）の起動、ログイン待ち、記事 API（作成・取得・更新）、画像アップロード（アイキャッチ・本文）、カテゴリ・リアクションの取得
 - `lib/markdown.mjs`: frontmatter の読み書き、markdown → Editor.js ブロックへの変換
+- `lib/images.mjs`: 本文画像の確認・読み込み、アップロード結果の再利用（`cache/uploaded-images.json`、git 管理外）
 - `install-skill.mjs`: スキルの配置。`skills/ourly-poster/SKILL.md` をひな形に、ツールの絶対パス（`{{TOOL_DIR}}`）を埋め込んでコピーし、配置先を `config.local.json` の `skillInstalls` に記録する（setup の再実行で更新）
 - `skills/ourly-poster/SKILL.md`: スキルのひな形（Claude Code / Codex 共通）。手順を変えたら AGENTS.md と合わせる
 - `lib/cli.mjs`: 設定の読み込み（`config.json` + `config.local.json`）、引数の解析、カテゴリ選択、`--help`
