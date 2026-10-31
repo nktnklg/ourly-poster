@@ -12,10 +12,10 @@
 import { pathToFileURL } from 'node:url';
 import { writeFrontmatterField } from './lib/markdown.mjs';
 import {
-  openAuthedContext, fetchCategories, fetchReactions, uploadEyecatch, buildArticlePayload, createDraft, emptyContentJson,
+  openAuthedContext, fetchReactions, uploadEyecatch, buildArticlePayload, createDraft, emptyContentJson,
 } from './lib/ourly.mjs';
 import {
-  config, parseArgs, showHelp, userPath, deriveEyecatch, loadArticle, chooseCategory, detailUrl, run,
+  config, parseArgs, showHelp, userPath, deriveEyecatch, loadArticle, resolveCategories, detailUrl, run,
 } from './lib/cli.mjs';
 
 export async function createDraftFromMarkdown(mdPath, args) {
@@ -36,23 +36,11 @@ export async function createDraftFromMarkdown(mdPath, args) {
   const { context, close } = await openAuthedContext(config);
   try {
     // カテゴリ解決（必須）。ourly の最新一覧から選ぶ。dry-run でも行う
-    const categories = await fetchCategories(context, config);
-    const articleCategory = await chooseCategory(
-      categories.article, { kind: '記事カテゴリ', opt: 'category', key: 'category' }, a.articleCategoryName);
-    const analysisCategory = await chooseCategory(
-      categories.analysis, { kind: '分析カテゴリ', opt: 'analysis', key: 'analysis' }, a.analysisCategoryName);
-    console.log('記事カテゴリ:', articleCategory.label);
-    console.log('分析カテゴリ:', analysisCategory.label);
-
-    const fmChanges = [['category', articleCategory.label], ['analysis', analysisCategory.label]]
-      .filter(([key, label]) => a.meta[key] !== label);
+    const { articleCategory, analysisCategory } = await resolveCategories(context, a, { dryRun: args['dry-run'] });
     if (args['dry-run']) {
-      if (fmChanges.length) console.log('（dry-run のため md には保存していません）');
       console.log('\n[dry-run] 作成はしません。');
       return null;
     }
-    for (const [key, label] of fmChanges) await writeFrontmatterField(a.absMd, key, label);
-    if (fmChanges.length) console.log('カテゴリを md の frontmatter に保存しました。');
 
     const reactions = await fetchReactions(context, config);
 

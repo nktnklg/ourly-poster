@@ -7,7 +7,7 @@ AI エージェント（Codex / Claude Code など）がこのリポジトリを
 markdown 記事を ourly 管理画面に **非公開の下書き** として保存する Node.js CLI。2段階で動く。
 
 1. `create-draft.mjs`: タイトル（本文先頭の H1）・アイキャッチ・カテゴリだけの空の下書きを作り、md の frontmatter に `ourly_id` を書き込む。
-2. `push-body.mjs`: md 本文を Editor.js ブロックに変換し（本文の画像はアップロードして画像ブロックにする）、`ourly_id` の下書きの本文だけを更新する（何度でも上書き可）。
+2. `push-body.mjs`: md 本文を Editor.js ブロックに変換し（本文の画像はアップロードして画像ブロックにする）、`ourly_id` の下書きの本文だけを更新する（何度でも上書き可）。`--meta`（または `--title` / `--eyecatch` / `--category` / `--analysis`）でタイトル・アイキャッチ・カテゴリも更新でき、`--no-body` で本文を更新せずそれらだけを変えられる。
 
 `post-draft.mjs` は 1 → 2 を続けて実行する。
 
@@ -21,7 +21,7 @@ markdown 記事を ourly 管理画面に **非公開の下書き** として保�
 | `npm run doctor` | 設定・依存・ログイン状態の確認（画面は開かない） | なし |
 | `npm run categories` | 現在のカテゴリ一覧を表示 | なし |
 | `node create-draft.mjs <md> --category <名前> --analysis <名前> [--dry-run]` | ① 空の下書きを作成 | **ourly に作成** |
-| `node push-body.mjs <md> [--dry-run]` | ② 本文を流し込む | **ourly を更新** |
+| `node push-body.mjs <md> [--meta] [--title] [--eyecatch <png>] [--category <名前>] [--analysis <名前>] [--no-body] [--dry-run]` | ② 本文を流し込む（オプションでタイトル・アイキャッチ・カテゴリも更新） | **ourly を更新** |
 | `node post-draft.mjs <md> ...` | ① → ② | **ourly に作成・更新** |
 
 各コマンドは `--help` で使い方を表示する。

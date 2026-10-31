@@ -21,6 +21,7 @@ markdown 記事を ourly 管理画面に **非公開の下書き** として保�
    - `ourly_id` がある: `node "{{TOOL_DIR}}/push-body.mjs" "<md の絶対パス>" --dry-run`
 4. **ユーザーの指示を得てから**、同じコマンドを `--dry-run` なしで実行する。出力の「詳細」URL をユーザーに伝える。
    - `ourly_id` がある md は `push-body.mjs` で本文だけを上書きする（下書きを作り直さない）。
+   - `ourly_id` がある md のタイトル・アイキャッチ・カテゴリを変えたいときは、`push-body.mjs` に `--meta`（まとめて md から反映）か `--title` / `--eyecatch <png>` / `--category <名前>` / `--analysis <名前>` を付ける。本文を変えないときは `--no-body` も付ける。まず `--dry-run` で変更前後を確認する。
 
 各コマンドの詳細は `--help` で表示できる。アイキャッチは md と同じフォルダの `<タイトル>_アイキャッチ.png` を自動で使う（`--eyecatch <png>` で指定も可）。
 

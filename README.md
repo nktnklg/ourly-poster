@@ -115,11 +115,14 @@ analysis: その他
 
 | オプション | 対象 | 説明 |
 |---|---|---|
-| `--category <名前>` | create / post | 記事カテゴリ。frontmatter の `category` より優先 |
-| `--analysis <名前>` | create / post | 分析カテゴリ。frontmatter の `analysis` より優先 |
-| `--eyecatch <png>` | create / post | アイキャッチ画像を指定（省略時は `_アイキャッチ.png` を自動で探す） |
+| `--category <名前>` | create / post / push | 記事カテゴリ。frontmatter の `category` より優先。push では指定すると記事カテゴリを差し替える |
+| `--analysis <名前>` | create / post / push | 分析カテゴリ。frontmatter の `analysis` より優先。push では指定すると分析カテゴリを差し替える |
+| `--eyecatch <png>` | create / post / push | アイキャッチ画像を指定（省略時は `_アイキャッチ.png` を自動で探す）。push では指定するとアイキャッチを差し替える |
 | `--force` | create / post | `ourly_id` がある md でも新しい下書きを作り直す |
 | `--id <記事ID>` | push | 流し込み先の記事。省略時は frontmatter の `ourly_id` |
+| `--meta` | push | タイトル（H1）・アイキャッチ・カテゴリもまとめて md から反映する |
+| `--title` | push | タイトルだけ H1 から反映する |
+| `--no-body` | push | 本文は更新しない（タイトル等だけ更新する） |
 | `--dry-run` | 全部 | 内容を表示するだけで保存しない |
 
 ## 動きの詳細
@@ -136,6 +139,9 @@ analysis: その他
 ### ② 本文の流し込み（push）
 
 - md の本文を ourly のエディタ形式に変換し、①で作った下書きの本文だけを差し替える。タイトル・アイキャッチ・カテゴリはそのまま。
+- タイトル・アイキャッチ・カテゴリも変えたいときは `--meta`（まとめて md から反映）、または `--title` / `--eyecatch <png>` / `--category` / `--analysis` で項目ごとに指定する。本文を変えずにこれらだけ更新するときは `--no-body` を付ける。
+  - 例: `npm run push -- 記事_本文.md --meta --no-body`
+  - `--dry-run` と一緒に使うと、ourly から現在の値を読み取って（保存はしない）変更前後を表示する。
 - 何度実行しても同じ下書きが上書きされる。
 - 公開済み・公開予約済みの記事は更新しない（エラーで止まる）。
 
